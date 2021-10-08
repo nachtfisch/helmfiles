@@ -1,0 +1,61 @@
+bases:
+- defaults.yaml
+---
+
+# repositories:
+#   - name: kubernetes-logging
+#     url: https://nickytd.github.io/kubernetes-logging-helm
+
+releases:
+- name: "logging"
+  namespace: "logging"  
+  # checkout from until merged to upstream git@github.com:nachtfisch/kubernetes-logging-helm.git?ref=issue-3-4-fetch
+  chart: "./kubernetes-logging-helm/charts"
+  # chart: "kubernetes-logging/kubernetes-logging"
+  version: 2.2.4
+  labels:
+    chart: "kubernetes-logging"
+    namespace: "logging"
+  values:
+  - elasticsearch:
+      single_node: true
+  # Elasticsearch coordination node configuration
+  - client:
+      ingress:
+        enabled: true
+        host: es.{{ .Values.domain }}
+        annotations:
+          nginx.ingress.kubernetes.io/enable-access-log: "true"
+          nginx.ingress.kubernetes.io/rewrite-target: "/"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+          nginx.ingress.kubernetes.io/ssl-redirect: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+          #haproxy.org/server-ssl: "true"
+          #haproxy.org/ssl-redirect: "true" 
+        tls:
+          - hosts:
+            - es.{{ .Values.domain }}
+            secretName: es-tls            
+  # Kibana configuration
+  - opensearch_dashboards:
+      ingress:
+        enabled: true 
+        host: logs.{{ .Values.domain }}
+        annotations:
+          nginx.ingress.kubernetes.io/enable-access-log: "true"
+          nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+        tls:
+          - hosts:
+              - logs.{{ .Values.domain }}
+            secretName: opensearch-dashboards-tls  
+      index_patterns:
+        - containers
+        - systemd
+        - nginx
+  - kafka:
+      enabled: false
+  - fluentbit:
+      journal_host_path: /var/log/journal
+      metrics:
+        enabled: true
