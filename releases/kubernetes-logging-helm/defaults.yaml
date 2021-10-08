@@ -1,1 +1,4 @@
-domain: sandbox.testing.innoveo.cloud
+environments:
+  default:
+    values:
+    - domain: testing.local

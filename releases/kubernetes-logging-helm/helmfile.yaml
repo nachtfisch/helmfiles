@@ -2,16 +2,15 @@ bases:
 - defaults.yaml
 ---
 
-# repositories:
-#   - name: kubernetes-logging
-#     url: https://nickytd.github.io/kubernetes-logging-helm
+repositories:
+  - name: kubernetes-logging
+    # url: https://nickytd.github.io/kubernetes-logging-helm    
+    url: git+https://github.com/nachtfisch/kubernetes-logging-helm@/?ref=issue-3-4-fix&sparse=0
 
 releases:
 - name: "logging"
-  namespace: "logging"  
-  # checkout from until merged to upstream git@github.com:nachtfisch/kubernetes-logging-helm.git?ref=issue-3-4-fetch
-  chart: "./kubernetes-logging-helm/charts"
-  # chart: "kubernetes-logging/kubernetes-logging"
+  namespace: "logging"    
+  chart: "kubernetes-logging/kubernetes-logging"
   version: 2.2.4
   labels:
     chart: "kubernetes-logging"
